@@ -5,9 +5,7 @@ namespace CompMath_Lab6
 	public static class Drawer
 	{
 		private static string Center(this string s, int length)
-		{
-			return s.PadLeft((length - s.Length) / 2 + s.Length).PadRight(length);
-		}
+			=> s.PadLeft((length - s.Length) / 2 + s.Length).PadRight(length);
 
 		public static void DrawTable(double[] xData, Dictionary<string, double[]> yData, string yAreaLabel, int precision)
 		{
