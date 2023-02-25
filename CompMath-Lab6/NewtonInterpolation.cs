@@ -13,7 +13,7 @@ public abstract class NewtonInterpolation : IInterpolation
 		return Interpolate(divDiff, samplesX, x);
 	}
 
-	private static double[][] GetDividedDifference((double X, double Y)[] samples)
+	private double[][] GetDividedDifference((double X, double Y)[] samples)
 	{
 		int n = samples.Length;
 		var divDiff = new double[n][];

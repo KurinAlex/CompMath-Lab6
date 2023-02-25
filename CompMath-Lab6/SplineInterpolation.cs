@@ -62,7 +62,7 @@ public class SplineInterpolation : IInterpolation
 		return yy;
 	}
 
-	private static double[] SolveTridiagonal(double[] a, double[] b, double[] c, double[] d)
+	private double[] SolveTridiagonal(double[] a, double[] b, double[] c, double[] d)
 	{
 		int n = a.Length;
 
