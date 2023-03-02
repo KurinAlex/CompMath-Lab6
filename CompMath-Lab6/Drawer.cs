@@ -1,4 +1,7 @@
-﻿using System.Text;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
 
 namespace CompMath_Lab6;
 
@@ -7,15 +10,19 @@ public static class Drawer
 	private static string Center(this string s, int length)
 		=> s.PadLeft((length - s.Length) / 2 + s.Length).PadRight(length);
 
-	public static void DrawTable(double[] xData, Dictionary<string, double[]> yData, string yAreaLabel, int precision)
+	public static string GetTableString(
+		IEnumerable<double> xData,
+		Dictionary<string, IEnumerable<double>> yData,
+		string yAreaLabel,
+		int precision)
 	{
 		if (precision < 0)
 		{
 			throw new ArgumentOutOfRangeException(nameof(precision), "Precision must be non-negative");
 		}
 
-		int n = xData.Length;
-		if (yData.Values.Any(d => d.Length != n))
+		int n = xData.Count();
+		if (yData.Values.Any(d => d.Count() != n))
 		{
 			throw new ArgumentException("Wrong entries count in y data array", nameof(yData));
 		}
@@ -67,6 +74,6 @@ public static class Drawer
 		}
 		sb.AppendFormat("└{0}┴{1}┴{2}┘", idRowDivider, xRowDivider, string.Join('┴', yRowsDividers));
 
-		Console.WriteLine(sb);
+		return sb.ToString();
 	}
 }

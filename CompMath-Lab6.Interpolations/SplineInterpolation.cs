@@ -1,4 +1,4 @@
-﻿namespace CompMath_Lab6;
+﻿namespace CompMath_Lab6.Interpolations;
 
 public class SplineInterpolation : IInterpolation
 {
@@ -24,20 +24,22 @@ public class SplineInterpolation : IInterpolation
 		}
 
 		// triagonalization matrix elements
-		var aa = new double[n - 1];
-		var bb = new double[n - 1];
-		var cc = new double[n - 1];
-		var dd = new double[n - 1];
+		var aa = new double[n - 2];
+		var bb = new double[n - 2];
+		var cc = new double[n - 2];
+		var dd = new double[n - 2];
 		for (int i = 0; i < n - 2; i++)
 		{
-			aa[i + 1] = h[i];
+			aa[i] = h[i];
 			bb[i] = 2.0 * (h[i] + h[i + 1]);
 			cc[i] = h[i + 1];
 			dd[i] = 3.0 * ((y[i + 2] - y[i + 1]) / h[i + 1] - (y[i + 1] - y[i]) / h[i]);
 		}
 
-		c[0] = 0.0;
-		SolveTridiagonal(aa, bb, cc, dd).CopyTo(c, 1);
+		if (n != 2)
+		{
+			SolveTridiagonal(aa, bb, cc, dd).CopyTo(c, 1);
+		}
 
 		for (int i = n - 2; i >= 0; i--)
 		{
@@ -54,6 +56,7 @@ public class SplineInterpolation : IInterpolation
 				break;
 			}
 		}
+		j = Math.Min(j, n - 2);
 
 		double t = xx - x[j];
 		double t2 = t * t;
@@ -68,12 +71,12 @@ public class SplineInterpolation : IInterpolation
 
 		for (int i = 1; i < n; i++)
 		{
-			double w = a[i] / b[i - 1];
+			double w = a[i - 1] / b[i - 1];
 			b[i] = b[i] - w * c[i - 1];
 			d[i] = d[i] - w * d[i - 1];
 		}
 
-		double[] x = new double[n];
+		var x = new double[n];
 		x[n - 1] = d[n - 1] / b[n - 1];
 		for (int i = n - 2; i >= 0; i--)
 		{

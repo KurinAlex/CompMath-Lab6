@@ -1,4 +1,4 @@
-﻿namespace CompMath_Lab6;
+﻿namespace CompMath_Lab6.Interpolations;
 
 public interface IInterpolation
 {
