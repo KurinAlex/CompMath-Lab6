@@ -10,6 +10,9 @@ using CompMath_Lab6.Interpolations;
 
 namespace CompMath_Lab6;
 
+using Series = IEnumerable<double>;
+using SeriesDictionary = Dictionary<string, IEnumerable<double>>;
+
 public class ViewModel
 {
 	private const int TestScale = 5;
@@ -25,22 +28,48 @@ public class ViewModel
 
 	public ViewModel()
 	{
-		PlotModel = new PlotModel
+		YModel = InitModel("y(x)", LegendPosition.TopLeft);
+		EModel = InitModel("e(x)", LegendPosition.TopCenter);
+	}
+
+	public PlotModel YModel { get; init; }
+	public PlotModel EModel { get; init; }
+
+	private PlotModel InitModel(string title, LegendPosition legendPosition)
+	{
+		var model = new PlotModel
 		{
-			Title = "e(x)"
+			Title = title
 		};
 
 		var legend = new Legend
 		{
 			LegendBorder = OxyColors.Black,
-			LegendPosition = LegendPosition.TopCenter
+			LegendPosition = legendPosition
 		};
-		PlotModel.Legends.Add(legend);
+		model.Legends.Add(legend);
+
+		return model;
+	}
+	private void UpdateSeries(PlotModel model, Series xArr, SeriesDictionary yData)
+	{
+		model.Series.Clear();
+		foreach (var yArr in yData)
+		{
+			var series = new LineSeries
+			{
+				Title = yArr.Key,
+				MarkerType = MarkerType.Diamond
+			};
+			foreach (var (x, y) in xArr.Zip(yArr.Value))
+			{
+				series.Points.Add(new(x, y));
+			}
+			model.Series.Add(series);
+		}
 	}
 
-	public PlotModel PlotModel { get; init; }
-
-	public (IEnumerable<double>, Dictionary<string, IEnumerable<double>>) GetData(double a, double b, int n)
+	public (Series, SeriesDictionary, SeriesDictionary) GetData(double a, double b, int n)
 	{
 		double width = b - a;
 		double step = width / (n - 1);
@@ -60,39 +89,33 @@ public class ViewModel
 			xData[i] = a + i * testStep;
 		}
 
-		var eData = new Dictionary<string, IEnumerable<double>>(interpolations.Length);
+		var yData = new SeriesDictionary(interpolations.Length)
+		{
+			["True"] = xData.Select(x => f(x))
+		};
+		var eData = new SeriesDictionary(interpolations.Length);
 		foreach (var interpolation in interpolations)
 		{
+			var yDataArray = new double[testN];
 			var eDataArray = new double[testN];
 			for (int i = 0; i < testN; i++)
 			{
 				double x = xData[i];
 				double y = interpolation.Interpolate(samples, x);
-				eDataArray[i] = Math.Abs(f(x) - y);
+				yDataArray[i] = y;
+				eDataArray[i] = Math.Abs(y - f(x));
 			}
+			yData.Add(interpolation.Name, yDataArray);
 			eData.Add(interpolation.Name, eDataArray);
 		}
 
-		return (xData, eData);
+
+		return (xData, yData, eData);
 	}
-
-	public void UpdateModel(double a, double b, int n)
+	public void UpdateModels(double a, double b, int n)
 	{
-		PlotModel.Series.Clear();
-
-		var (xData, eData) = GetData(a, b, n);
-		foreach (var eArr in eData)
-		{
-			var series = new LineSeries
-			{
-				Title = eArr.Key,
-				MarkerType = MarkerType.Diamond
-			};
-			foreach (var (x, e) in xData.Zip(eArr.Value))
-			{
-				series.Points.Add(new(x, e));
-			}
-			PlotModel.Series.Add(series);
-		}
+		var (x, y, e) = GetData(a, b, n);
+		UpdateSeries(YModel, x, y);
+		UpdateSeries(EModel, x, e);
 	}
 }

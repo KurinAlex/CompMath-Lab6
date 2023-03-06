@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.IO;
 using System.Windows;
 using System.Windows.Controls;
@@ -19,10 +20,11 @@ public partial class MainWindow : Window
 	{
 		InitializeComponent();
 
-		plot.Model = _viewModel.PlotModel;
+		yPlot.Model = _viewModel.YModel;
+		ePlot.Model = _viewModel.EModel;
 	}
 
-	private void UpdateModel(object sender, RoutedEventArgs e)
+	private void UpdateModels(object sender, RoutedEventArgs e)
 	{
 		if (nInput == null || (_n = (int)nInput.Value) < 2)
 		{
@@ -39,24 +41,26 @@ public partial class MainWindow : Window
 			return;
 		}
 
-		_viewModel.UpdateModel(_a, _b, _n);
-		plot.InvalidatePlot();
+		_viewModel.UpdateModels(_a, _b, _n);
+		yPlot.InvalidatePlot();
+		ePlot.InvalidatePlot();
+		ePlot.ResetAllAxes();
 	}
-
 	private void DownloadData(object sender, RoutedEventArgs e)
 	{
-		var (xData, eData) = _viewModel.GetData(_a, _b, _n);
+		var (xData, yData, eData) = _viewModel.GetData(_a, _b, _n);
 		string path = Path.Combine(DownloadFolder, "data.txt");
 		string text = string.Join(
 			Environment.NewLine,
 			$"a = {_a}",
 			$"b = {_b}",
 			$"n = {_n}",
+			Drawer.GetTableString(xData, yData, "y(x)", 6),
 			Drawer.GetTableString(xData, eData, "e(x)", 6));
 		File.WriteAllText(path, text);
+		Process.Start("notepad.exe", path);
 	}
-
-	private void TextBox_TextChanged(object sender, TextChangedEventArgs e)
+	private void TextBoxTextChanged(object sender, TextChangedEventArgs e)
 	{
 		if (sender != null && sender is TextBox textBox && int.TryParse(textBox.Text, out int tmp))
 		{
