@@ -1,17 +1,24 @@
-﻿namespace CompMath_Lab6.Interpolations;
+﻿using CompMath_Lab6.Utilities;
 
-public class NewtonForwardInterpolation : NewtonInterpolation
+namespace CompMath_Lab6.Interpolations;
+
+public class NewtonForwardInterpolation : PolynomialInterpolation
 {
+	public NewtonForwardInterpolation((double X, double Y)[] samples) : base(samples)
+	{
+	}
+
 	public override string Name => "Newton forward";
 
-	protected override double Interpolate(double[][] divDiff, double[] samplesX, double x)
+	protected override Polynomial GetPolynomial((double X, double Y)[] samples)
 	{
-		double p = divDiff[0][0];
-		double mul = 1.0;
-		for (int i = 1; i < samplesX.Length; i++)
+		var divDiff = MathHelper.GetDividedDifference(samples)[0];
+		var p = new Polynomial(divDiff[0]);
+		var mul = Polynomial.One;
+		for (int i = 1; i < samples.Length; i++)
 		{
-			mul *= x - samplesX[i - 1];
-			p += mul * divDiff[0][i];
+			mul *= new Polynomial(-samples[i - 1].X, 1.0);
+			p += mul * divDiff[i];
 		}
 		return p;
 	}

@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:oxy="http://oxyplot.org/wpf"
         mc:Ignorable="d"
-        Title="Lab 6" Height="420" Width="600">
+        Title="Lab 6" WindowState="Maximized" Width="600" Height="400">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition/>
@@ -19,15 +19,17 @@
         <oxy:PlotView x:Name="yPlot"/>
         <oxy:PlotView x:Name="ePlot" Grid.Row="1"/>
 
-        <StackPanel Grid.Column="1" Grid.RowSpan="2">
-            <Button Content="Download data" Click="DownloadData"/>
-            <TextBlock Text="n:"/>
-            <TextBox Text="{Binding ElementName=nInput,Path=Value}" TextChanged="TextBoxTextChanged"/>
-            <Slider x:Name="nInput" Minimum="2" Maximum="100" Value="6" ValueChanged="UpdateModels" IsSnapToTickEnabled="True"/>
-            <TextBlock Text="a:"/>
-            <TextBox x:Name="aInput" Text="1" TextChanged="UpdateModels"/>
-            <TextBlock Text="b:"/>
-            <TextBox x:Name="bInput" Text="6" TextChanged="UpdateModels"/>
-        </StackPanel>
+        <GroupBox Grid.Column="1" Grid.RowSpan="2" VerticalAlignment="Top" Header="Parameters">
+            <StackPanel>
+                <Button Content="Download data" Click="DownloadData"/>
+                <TextBlock Text="n:"/>
+                <TextBox Text="{Binding ElementName=nInput,Path=Value}" TextChanged="TextBoxTextChanged"/>
+                <Slider x:Name="nInput" Minimum="2" Maximum="100" Value="6" ValueChanged="UpdateModels" IsSnapToTickEnabled="True"/>
+                <TextBlock Text="a:"/>
+                <TextBox x:Name="aInput" Text="1" TextChanged="UpdateModels"/>
+                <TextBlock Text="b:"/>
+                <TextBox x:Name="bInput" Text="6" TextChanged="UpdateModels"/>
+            </StackPanel>
+        </GroupBox>
     </Grid>
 </Window>

@@ -1,9 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using System.Text;
 
-namespace CompMath_Lab6;
+namespace CompMath_Lab6.Utilities;
 
 public static class Drawer
 {

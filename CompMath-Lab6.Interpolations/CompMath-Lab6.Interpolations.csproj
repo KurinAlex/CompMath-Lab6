@@ -7,4 +7,8 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\CompMath-Lab6.Utilities\CompMath-Lab6.Utilities.csproj" />
+  </ItemGroup>
+
 </Project>

@@ -1,17 +1,23 @@
-﻿namespace CompMath_Lab6.Interpolations;
+﻿using CompMath_Lab6.Utilities;
 
-public class LagrangeInterpolation : IInterpolation
+namespace CompMath_Lab6.Interpolations;
+
+public class LagrangeInterpolation : PolynomialInterpolation
 {
-	public string Name => "Lagrange";
-
-	public double Interpolate((double X, double Y)[] samples, double x)
+	public LagrangeInterpolation((double X, double Y)[] samples) : base(samples)
 	{
-		double p = 0.0;
+	}
+
+	public override string Name => "Lagrange";
+
+	protected override Polynomial GetPolynomial((double X, double Y)[] samples)
+	{
+		var p = Polynomial.Zero;
 		int n = samples.Length;
 
 		for (int i = 0; i < n; i++)
 		{
-			double l = 1.0;
+			var l = Polynomial.One;
 			double xi = samples[i].X;
 
 			for (int j = 0; j < n; j++)
@@ -22,7 +28,7 @@ public class LagrangeInterpolation : IInterpolation
 				}
 
 				double xj = samples[j].X;
-				l *= (x - xj) / (xi - xj);
+				l *= new Polynomial(-xj, 1.0) / (xi - xj);
 			}
 
 			p += l * samples[i].Y;
