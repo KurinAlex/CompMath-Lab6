@@ -55,7 +55,7 @@ public readonly struct Polynomial
 
 		return new(coefficients);
 	}
-	
+
 	public static Polynomial operator *(Polynomial polynomial, double scale)
 		=> new(polynomial._coefficients.Select(c => c * scale));
 	public static Polynomial operator /(Polynomial polynomial, double scale)

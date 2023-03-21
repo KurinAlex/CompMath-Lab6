@@ -14,7 +14,8 @@ public class ViewModel
 {
 	private const int _testScale = 5;
 
-	private static readonly Func<double, double> _f = (double x) => Math.Log(3 * x + 1);
+	private static readonly Func<double, double> s_f = (double x) => Math.Log10(3.0 * x + 1.0);
+	private static readonly Func<double, double> s_df = (double x) => 3.0 / (3.0 * x + 1.0) / Math.Log(10.0);
 
 	public ViewModel()
 	{
@@ -65,22 +66,24 @@ public class ViewModel
 		double step = (b - a) / (n - 1);
 		var samples = Enumerable.Range(0, n)
 			.Select(i => a + i * step)
-			.Select(x => (x, _f(x)))
+			.Select(x => new FunctionDataSample(x, s_f(x), s_df(x)))
 			.ToArray();
 
-		int newN = (n - 1) * _testScale + 1;
 		IInterpolation[] interpolations = {
 			new LagrangeInterpolation(samples),
 			new NewtonForwardInterpolation(samples),
 			new NewtonBackwardInterpolation(samples),
 			new NaturalSplineInterpolation(samples),
-			new HermiteSplineInterpolation(samples)
+			new HermiteSplineInterpolation(samples),
+			new HermiteSplineFinDiffInterpolation(samples)
 		};
 
-		UpdateSeries(YModel, interpolations, (i, x) => i.Interpolate(x), a, b, newN);
-		YModel.Series.Add(new FunctionSeries(_f, a, b, newN, "True"));
+		int newN = (n - 1) * _testScale + 1;
 
-		UpdateSeries(EModel, interpolations, (i, x) => Math.Abs(_f(x) - i.Interpolate(x)), a, b, newN);
+		UpdateSeries(YModel, interpolations, (i, x) => i.Interpolate(x), a, b, newN);
+		YModel.Series.Add(new FunctionSeries(s_f, a, b, newN, "Exact"));
+
+		UpdateSeries(EModel, interpolations, (i, x) => Math.Abs(s_f(x) - i.Interpolate(x)), a, b, newN);
 	}
 	public (IEnumerable<double>, Dictionary<string, IEnumerable<double>>, Dictionary<string, IEnumerable<double>>)
 		GetData()
@@ -94,6 +97,6 @@ public class ViewModel
 			.ToDictionary(
 				s => s.Title,
 				s => ((DataPointSeries)s).Points.Select(p => p.Y));
-		return(xData, yData, eData);
+		return (xData, yData, eData);
 	}
 }

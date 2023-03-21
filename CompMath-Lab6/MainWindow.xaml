@@ -24,7 +24,7 @@
                 <Button Content="Download data" Click="DownloadData"/>
                 <TextBlock Text="n:"/>
                 <TextBox Text="{Binding ElementName=nInput,Path=Value}" TextChanged="TextBoxTextChanged"/>
-                <Slider x:Name="nInput" Minimum="2" Maximum="100" Value="6" ValueChanged="UpdateModels" IsSnapToTickEnabled="True"/>
+                <Slider x:Name="nInput" Minimum="2" Maximum="50" Value="6" ValueChanged="UpdateModels" IsSnapToTickEnabled="True"/>
                 <TextBlock Text="a:"/>
                 <TextBox x:Name="aInput" Text="1" TextChanged="UpdateModels"/>
                 <TextBlock Text="b:"/>

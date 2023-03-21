@@ -4,10 +4,10 @@ namespace CompMath_Lab6.Interpolations;
 
 public abstract class SplineInterpolation : IInterpolation
 {
-	private readonly double[] _x;
-	private readonly Polynomial[] _polynomials;
+	protected readonly double[] _x;
+	protected readonly Polynomial[] _polynomials;
 
-	public SplineInterpolation((double X, double Y)[] samples)
+	public SplineInterpolation(FunctionData samples)
 	{
 		var orderedSamples = samples.OrderBy(s => s.X);
 		_x = orderedSamples.Select(s => s.X).ToArray();
@@ -16,7 +16,7 @@ public abstract class SplineInterpolation : IInterpolation
 
 	public abstract string Name { get; }
 
-	protected abstract Polynomial[] GetPolynomials((double X, double Y)[] samples);
+	protected abstract Polynomial[] GetPolynomials(FunctionData samples);
 	public double Interpolate(double x)
 	{
 		int j = Array.BinarySearch(_x, x);

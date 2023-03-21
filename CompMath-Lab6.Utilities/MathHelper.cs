@@ -2,9 +2,9 @@
 
 public static class MathHelper
 {
-	public static double[][] GetDividedDifference((double X, double Y)[] samples)
+	public static double[][] GetDividedDifference(IList<(double X, double Y)> samples)
 	{
-		int n = samples.Length;
+		int n = samples.Count;
 		var divDiff = new double[n][];
 		for (int i = 0; i < n; i++)
 		{
@@ -20,7 +20,6 @@ public static class MathHelper
 		}
 		return divDiff;
 	}
-
 	public static double[] SolveTridiagonal(double[] a, double[] b, double[] c, double[] d)
 	{
 		int n = a.Length;

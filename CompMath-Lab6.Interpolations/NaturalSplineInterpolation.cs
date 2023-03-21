@@ -4,15 +4,15 @@ namespace CompMath_Lab6.Interpolations;
 
 public class NaturalSplineInterpolation : SplineInterpolation
 {
-	public NaturalSplineInterpolation((double X, double Y)[] samples) : base(samples)
+	public NaturalSplineInterpolation(FunctionData samples) : base(samples)
 	{
 	}
 
 	public override string Name => "Natural Spline";
 
-	protected override Polynomial[] GetPolynomials((double X, double Y)[] samples)
+	protected override Polynomial[] GetPolynomials(FunctionData samples)
 	{
-		int n = samples.Length - 1;
+		int n = samples.Count - 1;
 		var x = samples.Select(s => s.X).ToArray();
 		var y = samples.Select(s => s.Y).ToArray();
 

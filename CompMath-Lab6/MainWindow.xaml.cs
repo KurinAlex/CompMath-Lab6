@@ -71,9 +71,9 @@ public partial class MainWindow : Window
 	}
 	private void TextBoxTextChanged(object sender, TextChangedEventArgs e)
 	{
-		if (sender is TextBox textBox && int.TryParse(textBox.Text, out int tmp))
+		if (sender is TextBox textBox && int.TryParse(textBox.Text, out int val))
 		{
-			nInput.Value = tmp;
+			nInput.Value = val;
 		}
 	}
 }
