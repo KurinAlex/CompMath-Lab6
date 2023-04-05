@@ -7,6 +7,7 @@ using OxyPlot.Legends;
 using OxyPlot.Series;
 
 using CompMath_Lab6.Interpolations;
+using CompMath_Lab6.Utilities;
 
 namespace CompMath_Lab6;
 
@@ -65,8 +66,7 @@ public class ViewModel
 	public void UpdateModels(double a, double b, int n)
 	{
 		double step = (b - a) / (n - 1);
-		var samples = Enumerable.Range(0, n)
-			.Select(i => a + i * step)
+		var samples = Extensions.Range(a, step, n)
 			.Select(x => new FunctionDataSample(x, s_f(x), s_df(x), s_ddf(x)))
 			.ToArray();
 

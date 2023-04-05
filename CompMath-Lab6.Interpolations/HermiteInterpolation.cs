@@ -23,7 +23,7 @@ public class HermiteInterpolation : PolynomialInterpolation
 					Enumerable.Range(-1, n).Select(i => (i + 1) * Math.Pow(s.X, i)).Append(s.DY).ToArray(),
 					Enumerable.Range(-2, n).Select(i => (i + 2) * (i + 1) * Math.Pow(s.X, i)).Append(s.DDY).ToArray()
 				})
-			.Aggregate(Enumerable.Empty<double[]>(), (s, c) => s.Concat(c))
+			.Concat()
 			.ToArray();
 		var coef = MathHelper.Solve(matrix);
 		return new(coef);
