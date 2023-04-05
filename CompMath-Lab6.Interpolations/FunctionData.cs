@@ -2,4 +2,4 @@
 
 namespace CompMath_Lab6.Interpolations;
 
-public record struct FunctionDataSample(double X, double Y, double DY);
+public record struct FunctionDataSample(double X, double Y, double DY, double DDY);

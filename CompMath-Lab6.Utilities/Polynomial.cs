@@ -3,6 +3,7 @@
 public readonly struct Polynomial
 {
 	private readonly double[] _coefficients;
+	private readonly IEnumerable<double> _reversedCoefficients;
 	private readonly int _degree;
 
 	public Polynomial(params double[] coefficients) : this(coefficients as IEnumerable<double>)
@@ -10,22 +11,24 @@ public readonly struct Polynomial
 	}
 	private Polynomial(IEnumerable<double> coefficients)
 	{
-		_coefficients = coefficients
+		_reversedCoefficients = coefficients
 			.Reverse()
-			.SkipWhile(c => c == 0.0)
+			.SkipWhile(c => c == 0.0);
+		if (!_reversedCoefficients.Any())
+		{
+			_reversedCoefficients = _reversedCoefficients.Append(0.0);
+		}
+
+		_coefficients = _reversedCoefficients
 			.Reverse()
 			.ToArray();
-		if (_coefficients.Length == 0)
-		{
-			_coefficients = new[] { 0.0 };
-		}
 		_degree = _coefficients.Length;
 	}
 
 	public static readonly Polynomial Zero = new(0.0);
 	public static readonly Polynomial One = new(1.0);
 
-	public double At(double x) => _coefficients.Select((c, i) => c * Math.Pow(x, i)).Sum();
+	public double At(double x) => _reversedCoefficients.Aggregate(0.0, (s, c) => s * x + c);
 
 	public static Polynomial operator +(Polynomial left, Polynomial right)
 	{

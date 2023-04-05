@@ -10,12 +10,12 @@ public class HermiteSplineInterpolation : SplineInterpolation
 
 	public override string Name => "Hermite Spline";
 
-	protected virtual double[] GetDerivatives(FunctionData samples) => samples.Select(s => s.DY).ToArray();
 	protected override Polynomial[] GetPolynomials(FunctionData samples)
 	{
 		int n = samples.Count - 1;
 		var x = samples.Select(s => s.X).ToArray();
 		var y = samples.Select(s => s.Y).ToArray();
+		var m = samples.Select(s => s.DY).ToArray();
 
 		var h = new double[n];
 		var divDiff = new double[n];
@@ -23,8 +23,6 @@ public class HermiteSplineInterpolation : SplineInterpolation
 		{
 			h[i] = x[i + 1] - x[i];
 		}
-
-		var m = GetDerivatives(samples);
 
 		var polynomials = new Polynomial[n];
 		for (int i = 0; i < n; i++)

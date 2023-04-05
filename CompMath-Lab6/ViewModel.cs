@@ -16,6 +16,7 @@ public class ViewModel
 
 	private static readonly Func<double, double> s_f = (double x) => Math.Log10(3.0 * x + 1.0);
 	private static readonly Func<double, double> s_df = (double x) => 3.0 / (3.0 * x + 1.0) / Math.Log(10.0);
+	private static readonly Func<double, double> s_ddf = (double x) => -9.0 / Math.Pow(3.0 * x + 1.0, 2.0) / Math.Log(10.0);
 
 	public ViewModel()
 	{
@@ -66,16 +67,16 @@ public class ViewModel
 		double step = (b - a) / (n - 1);
 		var samples = Enumerable.Range(0, n)
 			.Select(i => a + i * step)
-			.Select(x => new FunctionDataSample(x, s_f(x), s_df(x)))
+			.Select(x => new FunctionDataSample(x, s_f(x), s_df(x), s_ddf(x)))
 			.ToArray();
 
 		IInterpolation[] interpolations = {
 			new LagrangeInterpolation(samples),
 			new NewtonForwardInterpolation(samples),
 			new NewtonBackwardInterpolation(samples),
+			new HermiteInterpolation(samples),
 			new NaturalSplineInterpolation(samples),
-			new HermiteSplineInterpolation(samples),
-			new HermiteSplineFinDiffInterpolation(samples)
+			new HermiteSplineInterpolation(samples)
 		};
 
 		int newN = (n - 1) * _testScale + 1;
