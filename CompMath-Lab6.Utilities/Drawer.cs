@@ -8,9 +8,16 @@ public static class Drawer
 		=> s.PadLeft((length - s.Length) / 2 + s.Length).PadRight(length);
 
 	public static string GetTableString(
-		IEnumerable<double> xData,
-		Dictionary<string, IEnumerable<double>> yData,
-		string yAreaLabel,
+		IEnumerable<double> keys,
+		IDictionary<string, IEnumerable<double>> values,
+		string title,
+		int precision)
+		=> GetTableString(new Dictionary<string, IEnumerable<double>>() { ["x"] = keys }, values, title, precision);
+
+	public static string GetTableString(
+		IDictionary<string, IEnumerable<double>> keys,
+		IDictionary<string, IEnumerable<double>> values,
+		string title,
 		int precision)
 	{
 		if (precision < 0)
@@ -18,10 +25,10 @@ public static class Drawer
 			throw new ArgumentOutOfRangeException(nameof(precision), "Precision must be non-negative");
 		}
 
-		int n = xData.Count();
-		if (yData.Values.Any(d => d.Count() != n))
+		int n = keys.First().Value.Count();
+		if (keys.Values.Any(d => d.Count() != n || values.Values.Any(d => d.Count() != n)))
 		{
-			throw new ArgumentException("Wrong entries count in y data array", nameof(yData));
+			throw new ArgumentException("Wrong entries count in y data array", nameof(values));
 		}
 
 		// id column data
@@ -30,18 +37,22 @@ public static class Drawer
 		int idColumnWidth = idStrings.Append(idLabel).Max(x => x.Length);
 		var id = idStrings.Select(x => x.Center(idColumnWidth)).ToArray();
 
-		// x column data
-		string xLabel = "x";
-		var xStrings = xData.Select(x => x.ToString($"F{precision}"));
-		int xColumnWidth = xStrings.Append(xLabel).Max(x => x.Length);
-		var x = xStrings.Select(x => x.Center(xColumnWidth)).ToArray();
+		// key columns data
+		var keysStrings = keys.ToDictionary(p => p.Key, p => p.Value.Select(y => y.ToString($"E{precision}")));
+		var keysColumnsWidth = keysStrings.Select(col => col.Value.Append(col.Key).Max(y => y.Length));
+		int keysAreaWidth = keysColumnsWidth.Sum() + keys.Count - 1;
+		var k = keysStrings
+			.Zip(keysColumnsWidth)
+			.ToDictionary(
+				t => t.First.Key.Center(t.Second),
+				t => t.First.Value.Select(y => y.Center(t.Second)).ToArray());
 
-		// y columns data
-		var yStrings = yData.ToDictionary(p => p.Key, p => p.Value.Select(y => y.ToString($"E{precision}")));
-		var yColumnsWidth = yStrings.Select(col => col.Value.Append(col.Key).Max(y => y.Length));
-		int yAreaWidth = yColumnsWidth.Sum() + yData.Count - 1;
-		var y = yStrings
-			.Zip(yColumnsWidth)
+		// value columns data
+		var valuesStrings = values.ToDictionary(p => p.Key, p => p.Value.Select(y => y.ToString($"E{precision}")));
+		var valuesColumnsWidth = valuesStrings.Select(col => col.Value.Append(col.Key).Max(y => y.Length));
+		int valuesAreaWidth = valuesColumnsWidth.Sum() + values.Count - 1;
+		var v = valuesStrings
+			.Zip(valuesColumnsWidth)
 			.ToDictionary(
 				t => t.First.Key.Center(t.Second),
 				t => t.First.Value.Select(y => y.Center(t.Second)).ToArray());
@@ -49,27 +60,26 @@ public static class Drawer
 		// dividers and spaces
 		string idRowDivider = new('─', idColumnWidth);
 		string idRowSpace = new(' ', idColumnWidth);
-		string xRowDivider = new('─', xColumnWidth);
-		string xRowSpace = new(' ', xColumnWidth);
-		string yAreaDivider = new('─', yAreaWidth);
-		var yRowsDividers = yColumnsWidth.Select(w => new string('─', w));
+		var keysRowsSpaces = keysColumnsWidth.Select(w => new string(' ', w));
+		var keysRowsDividers = keysColumnsWidth.Select(w => new string('─', w));
+		string valuesAreaDivider = new('─', valuesAreaWidth);
+		var valuesRowsDividers = valuesColumnsWidth.Select(w => new string('─', w));
 
 		// center the labels
 		idLabel = idLabel.Center(idColumnWidth);
-		xLabel = xLabel.Center(xColumnWidth);
-		yAreaLabel = yAreaLabel.Center(yAreaWidth);
+		title = title.Center(valuesAreaWidth);
 
 		var sb = new StringBuilder();
-		sb.AppendFormat("┌{0}┬{1}┬{2}┐", idRowDivider, xRowDivider, yAreaDivider).AppendLine();
-		sb.AppendFormat("│{0}│{1}│{2}│", idRowSpace, xRowSpace, yAreaLabel).AppendLine();
-		sb.AppendFormat("│{0}│{1}├{2}┤", idLabel, xLabel, string.Join('┬', yRowsDividers)).AppendLine();
-		sb.AppendFormat("│{0}│{1}│{2}│", idRowSpace, xRowSpace, string.Join('│', y.Keys)).AppendLine();
+		sb.AppendFormat("┌{0}┬{1}┬{2}┐", idRowDivider, string.Join('┬', keysRowsDividers), valuesAreaDivider).AppendLine();
+		sb.AppendFormat("│{0}│{1}│{2}│", idRowSpace, string.Join('│', keysRowsSpaces), title).AppendLine();
+		sb.AppendFormat("│{0}│{1}├{2}┤", idLabel, string.Join('│', k.Keys), string.Join('┬', valuesRowsDividers)).AppendLine();
+		sb.AppendFormat("│{0}│{1}│{2}│", idRowSpace, string.Join('│', keysRowsSpaces), string.Join('│', v.Keys)).AppendLine();
 		for (int i = 0; i < n; i++)
 		{
-			sb.AppendFormat("├{0}┼{1}┼{2}┤", idRowDivider, xRowDivider, string.Join('┼', yRowsDividers)).AppendLine();
-			sb.AppendFormat("│{0}│{1}│{2}│", id[i], x[i], string.Join('│', y.Values.Select(y => y[i]))).AppendLine();
+			sb.AppendFormat("├{0}┼{1}┼{2}┤", idRowDivider, string.Join('┼', keysRowsDividers), string.Join('┼', valuesRowsDividers)).AppendLine();
+			sb.AppendFormat("│{0}│{1}│{2}│", id[i], string.Join('│', k.Values.Select(key => key[i])), string.Join('│', v.Values.Select(val => val[i]))).AppendLine();
 		}
-		sb.AppendFormat("└{0}┴{1}┴{2}┘", idRowDivider, xRowDivider, string.Join('┴', yRowsDividers));
+		sb.AppendFormat("└{0}┴{1}┴{2}┘", idRowDivider, string.Join('┴', keysRowsDividers), string.Join('┴', valuesRowsDividers));
 
 		return sb.ToString();
 	}

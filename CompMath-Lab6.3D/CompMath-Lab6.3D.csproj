@@ -2,10 +2,15 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFramework>net6.0</TargetFramework>
+    <TargetFramework>net7.0</TargetFramework>
     <RootNamespace>CompMath_Lab6._3D</RootNamespace>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
   </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\CompMath-Lab6.Interpolations\CompMath-Lab6.Interpolations.csproj" />
+    <ProjectReference Include="..\CompMath-Lab6.Utilities\CompMath-Lab6.Utilities.csproj" />
+  </ItemGroup>
 
 </Project>

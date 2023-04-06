@@ -1,60 +1,101 @@
-﻿namespace CompMath_Lab6._3D;
+﻿using System.Diagnostics;
+
+using CompMath_Lab6.Utilities;
+
+namespace CompMath_Lab6._3D;
 
 public class Program
 {
+	const int TestScale = 5;
+	const string DownloadFile = @"D:\Sources\University\2 course\CompMath\CompMath-Lab6\Data\data3D.txt";
+
 	static double F(double x, double y) => Math.Log10(3 * (x + y) + 1);
-
-	static (double, double, double)[] GetSamples(double x0, double stepX, double y0, double stepY, int n)
-		=> Enumerable.Range(0, n).Select(i => x0 + stepX * i)
-				.Zip(Enumerable.Range(0, n).Select(i => y0 + stepY * i))
-				.Select(t => (t.First, t.Second, F(t.First, t.Second)))
-				.ToArray();
-
-	static double Interpolate((double X, double Y, double Z)[] samples, double x, double y)
+	static double Interpolate(double[] x, double[] y, double[][] z, double xx, double yy)
 	{
-		double z = 0.0;
-		int n = samples.Length;
-		for (int i = 0; i < n; i++)
+		double zz = 0.0;
+		int m = x.Length;
+		int n = y.Length;
+
+		for (int i = 0; i < m; i++)
 		{
-			var (xi, yi, zi) = samples[i];
-			double p = zi;
 			for (int j = 0; j < n; j++)
 			{
-				if (i == j)
+				double pr = z[i][j];
+
+				for (int p = 0; p < m; p++)
 				{
-					continue;
+					if (p == i)
+					{
+						continue;
+					}
+					pr *= (xx - x[p]) / (x[i] - x[p]);
 				}
 
-				var (xj, yj, _) = samples[j];
-				double rx1 = x - xj;
-				double ry1 = y - yj;
-				double rx2 = xi - xj;
-				double ry2 = yi - yj;
-				p *= (rx1 * rx2 + ry1 * ry2) / (rx2 * rx2 + ry2 * ry2);
+				for (int q = 0; q < n; q++)
+				{
+					if (q == j)
+					{
+						continue;
+					}
+					pr *= (yy - y[q]) / (y[j] - y[q]);
+				}
+
+				zz += pr;
 			}
-			z += p;
 		}
-		return z;
+		return zz;
 	}
 
 	static void Main()
 	{
-		int n = 6;
-		double x0 = 0.0;
-		double x1 = 5.0;
-		double y0 = 0.0;
-		double y1 = 5.0;
+		int n = Input.GetInput<int>("n", n => n > 0);
+		double x0 = Input.GetInput<double>("x0");
+		double x1 = Input.GetInput<double>("x1", x1 => x1 > x0);
+		double y0 = Input.GetInput<double>("y0");
+		double y1 = Input.GetInput<double>("y1", y1 => y1 > x0);
 
 		double stepX = (x1 - x0) / (n - 1);
 		double stepY = (y1 - y0) / (n - 1);
-		double testStepX = stepX / 5.0;
-		double testStepY = stepY / 5.0;
 
-		var samples = GetSamples(x0, stepX, y0, stepY, n);
-		var testSamples = GetSamples(x0, testStepX, y0, testStepY, n * 5);
+		int testN = (n - 1) * TestScale + 1;
+		double testStepX = stepX / TestScale;
+		double testStepY = stepY / TestScale;
 
-		Console.WriteLine(Interpolate(samples, 2, 2));
-		Console.WriteLine(F(2, 2));
+		var samplesX = Extensions.Range(x0, stepX, n).ToArray();
+		var samplesY = Extensions.Range(x0, stepX, n).ToArray();
+		var samplesZ = samplesX.Select(x => samplesY.Select(y => F(x, y)).ToArray()).ToArray();
+
+		var testX = Extensions.Range(x0, testStepX, testN);
+		var testY = Extensions.Range(x0, testStepY, testN);
+		var exactZ = testX.Select(x => testY.Select(y => F(x, y))).Concat();
+
+		var res = testX.Select(x => testY.Select(y => Interpolate(samplesX, samplesY, samplesZ, x, y))).Concat();
+
+		var points = new Dictionary<string, IEnumerable<double>>()
+		{
+			["x"] = testX.Select(x => Enumerable.Repeat(x, testN)).Concat(),
+			["y"] = Enumerable.Repeat(testY, testN).Concat()
+		};
+		var results = new Dictionary<string, IEnumerable<double>>()
+		{
+			["Results"] = res,
+			["Exact"] = exactZ
+		};
+
+		var errors = new Dictionary<string, IEnumerable<double>>()
+		{
+			["Errors"] = exactZ.Zip(res).Select(t => Math.Abs(t.First - t.Second))
+		};
+
+		var text = string.Join(
+			Environment.NewLine,
+			Drawer.GetTableString(points, results, "z(x,y)", 6),
+			Drawer.GetTableString(points, errors, "e(x,y)", 6));
+
+		Console.Write(text);
+		File.WriteAllText(DownloadFile, text);
+		Process.Start("notepad.exe", DownloadFile);
+
 		Console.ReadLine();
 	}
 }
